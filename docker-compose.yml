@@ -1,0 +1,44 @@
+version: '3'
+services:
+  server:
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    build:
+      dockerfile: Dockerfile
+      context: ./server
+    volumes:
+      - ./server:/app
+      - ./data:/data
+    links:
+      - mongo
+      - redis
+    depends_on:
+      - redis
+      - mongo
+
+  training:
+    build:
+      dockerfile: Dockerfile
+      context: ./training
+    restart: always
+    volumes:
+      - ./training:/app
+      - ./data:/data
+    links:
+      - mongo
+      - redis
+    depends_on:
+      - redis
+      - mongo
+  mongo:
+    container_name: mongo
+    image: mongo
+    ports:
+      - "27017:27017"
+  redis:
+    image: redis
+    container_name: redis
+
+
