@@ -14,30 +14,19 @@ model_path = os.path.join('/', 'data', training_data['username'], training_data[
 log_path = os.path.join('/', 'data', training_data['username'], training_data['project'], 'logs')
 
 training_runs = {
-    "run_1": {
-        "pre-trained": True,
-        "greyscale": False,
-        "flip_left_right": False,
-        "flip_vertical": False,
-        "test_size": .20,
-        "batch_size": 32,
-        "epochs": 50
-    },
     "run_2": {
         "pre-trained": True,
         "greyscale": False,
         "flip_left_right": True,
-        "flip_up_down": True,
-        "rotate_90": True,
-        "rotate_180": True,
-        "rotate_270": True,
+        "flip_up_down": False,
+        "rotate_90": False,
+        "rotate_180": False,
+        "rotate_270": False,
         "test_size": .20,
         "batch_size": 32, # batch size needs to be divisible by (batch_offset + 1)
         "epochs": 50
     }
 }
-
-
 
 for i, run in enumerate(training_runs):
     run_key = training_runs.get(run)

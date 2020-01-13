@@ -22,7 +22,7 @@ class Trainer:
     def train(self):
         ip = ImageProcessing(self.data_path, test_size=self.test_size)
         train_generator = DataGenerator(ip.X_train, ip.y_train, batch_size=self.batch_size, run_parameters=self.run_parameters)
-        valid_generator = DataGenerator(ip.X_test, ip.y_test, batch_size=self.batch_size, run_parameters=self.run_parameters)
+        valid_generator = DataGenerator(ip.X_test, ip.y_test, batch_size=self.batch_size, run_parameters=self.run_parameters, validation=True)
 
         es = EarlyStopping(monitor='val_loss', mode='min', verbose=1)
 

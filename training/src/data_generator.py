@@ -7,13 +7,17 @@ from tensorflow.keras.applications.resnet50 import ResNet50, preprocess_input
 
 
 class DataGenerator(keras.utils.Sequence):
-    def __init__(self, image_refs, labels, batch_size, run_parameters, dim=(1,2048), shuffle=True):
+    def __init__(self, image_refs, labels, batch_size, run_parameters, dim=(1,2048), shuffle=True, validation=False):
         self.dim = dim
         self.labels = labels
         self.run_parameters = run_parameters
+        self.validation = validation
+        # calculate how many images to get per batch based on augmentation
         self.grab_images_per_batch, self.batch_size = self._calc_batch_size(image_refs, batch_size)
         self.image_refs = image_refs
         self.shuffle = shuffle
+
+
 
         if self.run_parameters.get('pre-trained'):
             self.pre_trained_model = self._build_pre_trained_model()
@@ -38,16 +42,17 @@ class DataGenerator(keras.utils.Sequence):
 
     def _calc_batch_size(self, image_refs, batch_size):
         extra_images = 0
-        if self.run_parameters.get('flip_left_right'):
-            extra_images +=1
-        if self.run_parameters.get('flip_up_down'):
-            extra_images +=1
-        if self.run_parameters.get('rotate_90'):
-            extra_images +=1
-        if self.run_parameters.get('rotate_180'):
-            extra_images += 1
-        if self.run_parameters.get('rotate_270'):
-            extra_images += 1
+        if not self.validation:
+            if self.run_parameters.get('flip_left_right'):
+                extra_images +=1
+            if self.run_parameters.get('flip_up_down'):
+                extra_images +=1
+            if self.run_parameters.get('rotate_90'):
+                extra_images +=1
+            if self.run_parameters.get('rotate_180'):
+                extra_images += 1
+            if self.run_parameters.get('rotate_270'):
+                extra_images += 1
 
         if len(image_refs) < batch_size:
             batch_size = 1
@@ -85,33 +90,32 @@ class DataGenerator(keras.utils.Sequence):
     def _augment_pipeline(self, img: PIL):
         augmented_images = []
         augmented_images.append(img) # append original image by default
-        if self.run_parameters.get('flip_left_right'):
-            left_right = img.transpose(PIL.Image.FLIP_LEFT_RIGHT)
-            augmented_images.append(left_right)
 
+        if not self.validation:
+            if self.run_parameters.get('flip_left_right'):
+                left_right = img.transpose(PIL.Image.FLIP_LEFT_RIGHT)
+                augmented_images.append(left_right)
 
-        if self.run_parameters.get('flip_up_down'):
-            up_down = img.transpose(PIL.Image.FLIP_TOP_BOTTOM)
-            augmented_images.append(up_down)
+            if self.run_parameters.get('flip_up_down'):
+                up_down = img.transpose(PIL.Image.FLIP_TOP_BOTTOM)
+                augmented_images.append(up_down)
 
+            if self.run_parameters.get('rotate_90'):
+                rotate_90 = img.transpose(PIL.Image.ROTATE_90)
+                augmented_images.append(rotate_90)
+                rotate_90.save('rotate_90.png')
 
-        if self.run_parameters.get('rotate_90'):
-            rotate_90 = img.transpose(PIL.Image.ROTATE_90)
-            augmented_images.append(rotate_90)
-            rotate_90.save('rotate_90.png')
+            if self.run_parameters.get('rotate_180'):
+                rotate_180 = img.transpose(PIL.Image.ROTATE_180)
+                augmented_images.append(rotate_180)
 
-        if self.run_parameters.get('rotate_180'):
-            rotate_180 = img.transpose(PIL.Image.ROTATE_180)
-            augmented_images.append(rotate_180)
+            if self.run_parameters.get('rotate_270'):
+                rotate_270 = img.transpose(PIL.Image.ROTATE_270)
+                augmented_images.append(rotate_270)
 
-        if self.run_parameters.get('rotate_270'):
-            rotate_270 = img.transpose(PIL.Image.ROTATE_270)
-            augmented_images.append(rotate_270)
-
-        if self.run_parameters.get('greyscale'):
-            greyscale = img.transpose(PIL.Image.ROTATE_270)
-            augmented_images.append(greyscale)
-            greyscale.save('greyscale.png')
+            if self.run_parameters.get('greyscale'):
+                greyscale = img.transpose(PIL.Image.ROTATE_270)
+                augmented_images.append(greyscale)
 
 
         return augmented_images
@@ -122,7 +126,6 @@ class DataGenerator(keras.utils.Sequence):
         y = []
         # Generate data
         for i, img in enumerate(image_refs):
-            # Store sample
             pil_img = Image.open(img)
             augmented_images = self._augment_pipeline(pil_img) # augments images (flips, zooms ect...)
             for image in augmented_images:
@@ -130,7 +133,7 @@ class DataGenerator(keras.utils.Sequence):
                 y.append(image_labels[i])
 
         X = np.array(X)
-        X = X.reshape((self.batch_size, 2048))
+        X = X.reshape((self.batch_size, 2048)) # shape is res net output
 
         print(X.shape)
 
