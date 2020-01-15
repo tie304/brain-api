@@ -14,14 +14,24 @@ model_path = os.path.join('/', 'data', training_data['username'], training_data[
 log_path = os.path.join('/', 'data', training_data['username'], training_data['project'], 'logs')
 
 training_runs = {
+    "run_1": {
+        "pre-trained": True,
+
+        "augmentation": {
+
+        },
+        "test_size": .20,
+        "batch_size": 32, # batch size needs to be divisible by (batch_offset + 1)
+        "epochs": 50
+    },
     "run_2": {
         "pre-trained": True,
         "greyscale": False,
-        "flip_left_right": True,
-        "flip_up_down": False,
-        "rotate_90": False,
-        "rotate_180": False,
-        "rotate_270": False,
+        "augmentation": {
+            "flip_left_right": True,
+            "blur": 2, # creates n blured images increasing in fuzzyness,
+            "rotate_random_25": 2,
+        },
         "test_size": .20,
         "batch_size": 32, # batch size needs to be divisible by (batch_offset + 1)
         "epochs": 50

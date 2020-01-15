@@ -24,7 +24,7 @@ class Trainer:
         train_generator = DataGenerator(ip.X_train, ip.y_train, batch_size=self.batch_size, run_parameters=self.run_parameters)
         valid_generator = DataGenerator(ip.X_test, ip.y_test, batch_size=self.batch_size, run_parameters=self.run_parameters, validation=True)
 
-        es = EarlyStopping(monitor='val_loss', mode='min', verbose=1)
+        es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, restore_best_weights=True)
 
         feature_model = Sequential()
         feature_model.add(Dense(ip.n_classes, activation="softmax"))
