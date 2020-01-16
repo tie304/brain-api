@@ -1,3 +1,4 @@
+import os
 import jwt
 from fastapi import APIRouter, HTTPException, Depends
 from jwt import PyJWTError
@@ -6,9 +7,9 @@ from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from datetime import datetime, timedelta
 
-SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+AUTH_SECRET_KEY = os.environ.get("AUTH_SECRET_KEY")
+AUTH_ALGORITHM = os.environ.get("AUTH_ALGORITHM")
+AUTH_ACCESS_TOKEN_EXPIRE_MINUTES = os.environ.get("AUTH_ACCESS_TOKEN_EXPIRE_MINUTES")
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
@@ -29,7 +30,7 @@ def create_access_token(*, data: dict, expires_delta: timedelta = None):
     else:
         expire = datetime.utcnow() + timedelta(minutes=15)
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, AUTH_SECRET_KEY, algorithm=AUTH_ALGORITHM)
     return encoded_jwt
 
 
@@ -41,7 +42,7 @@ async def validate_current_user(token: str):
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, AUTH_SECRET_KEY, algorithms=[AUTH_ALGORITHM])
         username: str = payload.get("sub")
         token_data = TokenData(username=username)
         if username is None:

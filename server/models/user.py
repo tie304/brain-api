@@ -1,11 +1,10 @@
 from pydantic import BaseModel
 
 
-class User(BaseModel):
+class UserSignup(BaseModel):
     email: str
     name: str
     password: str
-    authenticated: bool = False
 
 
 class UserLogin(BaseModel):
