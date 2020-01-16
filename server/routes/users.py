@@ -5,7 +5,7 @@ from models.user import UserSignup, UserLogin
 from modules.auth import *
 
 from database.user import User
-from datetime import datetime, timedelta
+
 
 
 router = APIRouter()
@@ -35,9 +35,8 @@ async def login_user(user_login: UserLogin):
     if not find_user:
         return HTTPException(status_code = 404, detail="user not found")
     if verify_password(password, find_user.password):
-        access_token_expires = timedelta(minutes=30)
         access_token = create_access_token(
-            data={"sub": email}, expires_delta=access_token_expires)
+            data={"sub": email})
         return {"access_token": access_token, "token_type": "bearer"}
     return HTTPException(status_code = 401, detail="Invalid password")
 
