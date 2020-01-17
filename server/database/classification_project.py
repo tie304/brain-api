@@ -1,3 +1,4 @@
+import uuid
 from pymodm import connect, fields, MongoModel, EmbeddedMongoModel
 
 
@@ -12,6 +13,7 @@ class ClassData(EmbeddedMongoModel):
 
 
 class ClassificationProject(MongoModel):
+    _id = fields.CharField(required=True, default=uuid.uuid4(), primary_key=True)
     user = fields.ReferenceField(User, required=True)
     name = fields.CharField(required=True, blank=False)
     created = fields.DateTimeField(required=True)

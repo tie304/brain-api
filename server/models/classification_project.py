@@ -7,10 +7,17 @@ class ClassData(BaseModel):
     keywords: List[str]
 
 
-
 class CreateClassificationProject(BaseModel):
     name: str
     description: str
     classes: List[ClassData]
 
 
+class GetClassificationProject(BaseModel):
+    name: str
+    description: str
+    classes: List[ClassData]
+
+
+class GetClassificationProjects(BaseModel):
+    projects: List[GetClassificationProject]
