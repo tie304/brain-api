@@ -18,6 +18,11 @@ class GetClassificationProject(BaseModel):
     description: str
     classes: List[ClassData]
 
+class UpdateClassificationProject(BaseModel):
+    name: str
+    description: str
+    classes: List[ClassData]
+
 
 class GetClassificationProjects(BaseModel):
     projects: List[GetClassificationProject]

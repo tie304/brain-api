@@ -50,25 +50,25 @@ class PymodmPydanticBridge:
             obj = cls._import(f'{cls.PYTANTIC_MODULE_DIR}.{file}.{class_}')
             if obj and callable(obj):
                 return obj
-        raise ImportError("Module not found. Please make sure you entered the correct target_class")
+        raise ImportError("Module not found. Please make sure Pydantic and ORM Classes share the same name")
 
     @classmethod
     def _find_model_pymorm(cls, class_):
-        model_files = os.listdir(PymodmPydanticBridge.PYMORM_MODULE_DIR)
+        model_files = os.listdir(cls.PYMORM_MODULE_DIR)
         for file in model_files:
             file = file.split('.')[0]
-            obj = cls._import(f'{PymodmPydanticBridge.PYMORM_MODULE_DIR}.{file}.{class_}')
+            obj = cls._import(f'{cls.PYMORM_MODULE_DIR}.{file}.{class_}')
             if obj and callable(obj):
                 return obj
-        raise ImportError("Module not found. Please make sure you entered the correct target_class")
+        raise ImportError("Module not found. Please make sure Pydantic and ORM Classes share the same name")
 
     @staticmethod
     def _import(module):
         components = module.split('.')
-        mod = __import__(components[0]) # loop and try to import each component of the module
+        mod = __import__(components[0])
         for comp in components[1:]:
             try:
-                class_import = getattr(mod, comp)
+                mod = getattr(mod, comp)
             except AttributeError: # if fails to get module
                 return False
-        return class_import
+        return mod

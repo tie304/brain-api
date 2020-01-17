@@ -44,6 +44,14 @@ async def get_classification_project_by_id(_id: str, token: str = Depends(oauth2
     return project
 
 
+@router.delete("/projects/classification_project", status_code=200, tags=["classification_project"])
+async def delete_classification_project(_id: str, token: str = Depends(oauth2_scheme)):
+    username = await validate_current_user(token)
+    ClassificationProject.objects.get({'_id': _id}).delete()
+    return "project deleted"
+
+
+
 @router.get("/projects/classification_project/all", status_code=200, response_model=GetClassificationProjects, tags=["classification_project"])
 async def get_classification_project_by_id(token: str = Depends(oauth2_scheme)):
     username = await validate_current_user(token)
@@ -54,11 +62,19 @@ async def get_classification_project_by_id(token: str = Depends(oauth2_scheme)):
     return {'projects': projects}
 
 
-@router.delete("/classification_project", status_code=200, tags=["classification_project"])
-async def delete_classification_project():
-    pass
 
+@router.put("/projects/classification_project", status_code=200, tags=["classification_project"])
+async def update_classification_project(_id: str, project_update: CreateClassificationProject, token: str = Depends(oauth2_scheme)):
+    user = await validate_current_user(token)
+    query = ClassificationProject.objects.get({'_id': _id})
 
-@router.put("/classification_project", status_code=200, tags=["classification_project"])
-async def update_classification_project():
-    pass
+    classes = PymodmPydanticBridge.pydatic_to_pymodm(project_update.classes, target_class="ClassData")
+    project = PymodmPydanticBridge.pydatic_to_pymodm(project_update, target_class="ClassificationProject")
+
+    project.classes = classes
+    project._id = _id
+    project.user = user
+
+    project.save()
+    # vars(project_update)
+    return "project updated"
