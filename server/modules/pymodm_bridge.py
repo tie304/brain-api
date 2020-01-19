@@ -31,8 +31,9 @@ class PymodmPydanticBridge:
             data = list(class_)
             instance = cls._find_model_pydantic(target_class)
             instances = []
-            for d in data:
-                instances.append(instance(**d.to_son().to_dict()))
+            for class_ in data:
+                instance = instance(**class_.to_son().to_dict())
+                instances.append(instance)
             if len(instances) == 1:
                 return instances[0]
             else:
@@ -40,7 +41,6 @@ class PymodmPydanticBridge:
         else:
             instance = cls._find_model_pydantic(target_class)
             return instance(**class_.to_son().to_dict())
-
 
     @classmethod
     def _find_model_pydantic(cls, class_):

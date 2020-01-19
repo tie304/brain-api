@@ -31,7 +31,11 @@ async def create_user(user_signup: UserSignup):
 @router.post("/login", tags=["users"])
 async def login_user(user_login: UserLogin):
     email, password = user_login.email, user_login.password
-    find_user = User.objects.get({'_id': email})
+    try:
+        find_user = User.objects.get({'_id': email})
+    except DBerrors.DoesNotExist:
+        return HTTPException(status_code=404, detail="User Does Not Exist")
+
     if not find_user:
         return HTTPException(status_code = 404, detail="user not found")
     if verify_password(password, find_user.password):

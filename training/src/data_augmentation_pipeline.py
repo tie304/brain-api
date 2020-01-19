@@ -11,6 +11,7 @@ class DataAugmentationPipeline:
     def __init__(self, augmentation_params: dict):
         self.augmentation_params = augmentation_params
 
+    """ Calculates total amount of additional images created for each image"""
     @property
     def total_augmented_images(self):
         total_images = 0
@@ -23,6 +24,7 @@ class DataAugmentationPipeline:
 
     def augment(self, img: PIL):
         augmented_images = []
+        img = img.convert('RGB')
         augmented_images.append(img)
 
         if self.augmentation_params.get('flip_left_right'):
@@ -61,7 +63,13 @@ class DataAugmentationPipeline:
         blur_images = []
         blur_start = 3
         for i in range(self.augmentation_params.get('blur')):
-            blur_img = img.filter(ImageFilter.GaussianBlur(blur_start))
-            blur_images.append(blur_img)
-            blur_start += 1
+            try:
+                blur_img = img.filter(ImageFilter.GaussianBlur(blur_start))
+                blur_images.append(blur_img)
+                blur_start += 1
+            except Exception as e:
+                print('Failed to blur image:', e)
+                print(img.mode)
+
         return blur_images
+

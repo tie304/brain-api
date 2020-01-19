@@ -25,6 +25,21 @@ services:
       - AUTH_ALGORITHM=HS256
       - AUTH_ACCESS_TOKEN_EXPIRE_MINUTES=120
 
+  image_collector:
+    build:
+      dockerfile: Dockerfile
+      context: ./image-collector
+    restart: always
+    volumes:
+      - ./image-collector:/app
+      - ./data:/data
+    links:
+      - mongo
+      - redis
+    depends_on:
+      - redis
+      - mongo
+
   training:
     build:
       dockerfile: Dockerfile
@@ -33,6 +48,7 @@ services:
     volumes:
       - ./training:/app
       - ./data:/data
+      - ./server/database:/app/database
     links:
       - mongo
       - redis

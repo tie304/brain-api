@@ -6,7 +6,7 @@ from selenium.webdriver.firefox.options import Options
 
 
 class GoogleImageCollector:
-    def __init__(self, project, subclass, search_term, max_images=1, username=None, headless=True):
+    def __init__(self, project, subclass, search_term, max_images, username=None, headless=True):
         self.headless = headless
         self.max_images = max_images
         self.search_term = search_term
@@ -65,10 +65,10 @@ class GoogleImageCollector:
                 except Exception as e:
                     print("Failed Persisting Image", e)
 
-                if self.success_counter == self.max_images:
+                if self.success_counter >= self.max_images:
                     break
 
-            if self.success_counter == self.max_images:
+            if self.success_counter >= self.max_images:
                 break
 
         print(self.success_counter, "pictures succesfully downloaded")

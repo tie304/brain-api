@@ -1,3 +1,4 @@
+import uuid
 from pymodm import connect, fields, MongoModel, EmbeddedMongoModel
 
 

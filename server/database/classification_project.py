@@ -14,7 +14,7 @@ class ClassData(EmbeddedMongoModel):
 
 
 class ClassificationProject(MongoModel):
-    _id = fields.CharField(required=True, default=uuid.uuid4(), primary_key=True)
+    _id = fields.CharField(primary_key=True, required=True, default=uuid.uuid4)
     user = fields.ReferenceField(User, required=True)
     name = fields.CharField(required=True, blank=False)
     created = fields.DateTimeField(required=True, default=datetime.datetime.now())

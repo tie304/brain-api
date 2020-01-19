@@ -9,24 +9,23 @@ from src.data_augmentation_pipeline import DataAugmentationPipeline
 
 
 class DataGenerator(keras.utils.Sequence):
-    def __init__(self, image_refs, labels, batch_size, run_parameters, dim=(1,2048), shuffle=True, validation=False):
-        self.dim = dim
+    def __init__(self, image_refs, labels, batch_size, run_parameters, validation=False):
+        print("Initializing data generator...")
         self.labels = labels
         self.run_parameters = run_parameters
         self.validation = validation
-        self.augment_pipeline = DataAugmentationPipeline(run_parameters.get('augmentation'))
+        if self.run_parameters.get("augmentation", False):
+            self.augment_pipeline = DataAugmentationPipeline(run_parameters.get('augmentation'))
         # calculate how many images to get per batch based on augmentation
         self.grab_images_per_batch, self.batch_size = self._calc_batch_size(image_refs, batch_size)
-
-        print(self.grab_images_per_batch, self.batch_size, "IMAGS PER BATCH, BATCH SIZE")
         self.image_refs = image_refs
-        self.shuffle = shuffle
-
-
-
-        if self.run_parameters.get('pre-trained'):
-            self.pre_trained_model = self._build_pre_trained_model()
+        if self.run_parameters.get('model'):
+            self.pre_trained_model = self._build_pre_trained_model(run_parameters.get('model'))
         self.on_epoch_end()
+
+
+        print(f"Processing: {self.grab_images_per_batch} images per batch and feeding {self.batch_size}  images per batch")
+        print(f"Training with {self.run_parameters.get('model')} ")
 
     def __len__(self):
         return int(np.floor(len(self.image_refs) / self.grab_images_per_batch))
@@ -42,7 +41,7 @@ class DataGenerator(keras.utils.Sequence):
 
     def on_epoch_end(self):
         self.indexes = np.arange(len(self.image_refs))
-        if self.shuffle:
+        if self.run_parameters.get('shuffle', False):
             np.random.shuffle(self.indexes)
 
     def _calc_batch_size(self, image_refs, batch_size):
@@ -67,7 +66,7 @@ class DataGenerator(keras.utils.Sequence):
             """
 
         extra_images = 0
-        if not self.validation:
+        if not self.validation and self.run_parameters.get("augmentation", False):
             extra_images = self.augment_pipeline.total_augmented_images
 
             if len(image_refs) < batch_size:
@@ -96,13 +95,8 @@ class DataGenerator(keras.utils.Sequence):
 
     def _pre_process_image(self, img: PIL):
         img = img.resize((224,224), Image.ANTIALIAS)
-        if self.run_parameters.get('greyscale'):
-            img = img.convert('L')
-            img = np.array(img)
-            img = np.repeat(img[..., np.newaxis], 3, -1)
-        else:
-            img = img.convert('RGB')
-            img = np.array(img)
+        img = img.convert('RGB')
+        img = np.array(img)
         img = img / 255
         img = img.reshape((1, 224, 224, 3))
         img = preprocess_input(img) # resnet preprocess
@@ -110,10 +104,13 @@ class DataGenerator(keras.utils.Sequence):
         return img
 
     @staticmethod
-    def _build_pre_trained_model():
-        base_model = ResNet50(weights="imagenet")
-        second_2_last_layer = base_model.get_layer("avg_pool")
-        model = keras.Model(inputs=base_model.inputs, outputs=second_2_last_layer.output)
+    def _build_pre_trained_model(model):
+        if model == "resnet50":
+            base_model = ResNet50(weights="imagenet")
+            second_2_last_layer = base_model.get_layer("avg_pool")
+            model = keras.Model(inputs=base_model.inputs, outputs=second_2_last_layer.output)
+        else:
+            raise NotImplementedError('only resnet 50 supported at this time')
         return model
 
 
@@ -124,7 +121,7 @@ class DataGenerator(keras.utils.Sequence):
         # Generate data
         for i, img in enumerate(image_refs):
             pil_img = Image.open(img)
-            if not self.validation:
+            if not self.validation and self.run_parameters.get("augmentation", False):
                 augmented_images = self.augment_pipeline.augment(pil_img) # augments images (flips, zooms ect...)
                 for image in augmented_images:
                     X.append(self._pre_process_image(image)) # processes the image for the NN
@@ -134,7 +131,6 @@ class DataGenerator(keras.utils.Sequence):
                 y.append(image_labels[i])
 
         X = np.array(X)
-        print(X.shape, f"validation data: ", self.validation)
         X = X.reshape((self.batch_size, 2048)) # shape is res net output
 
         return X, np.array(y)

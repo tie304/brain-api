@@ -10,12 +10,9 @@ import routes.classifcation_project as classifcation_project
 
 from redis_conn import RedisConn
 
-
-
 app = FastAPI()
-print(os.environ.get('MONGO_URI') + os.environ.get("MONGO_DB_NAME"))
-connect(os.environ.get('MONGO_URI') + os.environ.get("MONGO_DB_NAME"))
 
+connect(os.environ.get('MONGO_URI') + os.environ.get("MONGO_DB_NAME"))
 RedisConn.initialize(os.environ.get('REDIS_HOST'), os.environ.get('REDIS_PORT'))
 
 app.include_router(users.router)

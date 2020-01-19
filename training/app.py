@@ -1,49 +1,70 @@
 import os
 import json
+import sys
+import datetime
+from pymodm import connect
+
 from redis_conn import RedisConn
 from src.trainer import Trainer
+from database.training import TrainingInstance, TrainingRun
+from database.classification_project import ClassificationProject
 
 
-RedisConn.initialize('redis', 6379)
+# connect to redis and mongo
+RedisConn.initialize(os.environ.get('REDIS_HOST'), os.environ.get('REDIS_PORT'))
+connect(os.environ.get('MONGO_URI') + os.environ.get("MONGO_DB_NAME"))
 
-data = RedisConn.CONN.blpop('training-queue') # blocking operation until data enters queue
-training_data = json.loads(data[1]) # load json string from redis
+# blocking operation until data enters queue
+data = RedisConn.CONN.blpop('training-queue')
+# load json string from redis
+training_data = json.loads(data[1])
 
-data_path = os.path.join('/', 'data', training_data['username'], training_data['project'], 'data')
-model_path = os.path.join('/', 'data', training_data['username'], training_data['project'], 'models')
-log_path = os.path.join('/', 'data', training_data['username'], training_data['project'], 'logs')
+# query project
+project = ClassificationProject.objects.get({'_id': training_data.get('project_id')})
 
-training_runs = {
-    "run_1": {
-        "pre-trained": True,
+# find specific training instance from the project object
+training_instance = None
+for instance in project.training_instances:
+    if instance._id == training_data.get('training_instance_id'):
+        training_instance = instance
 
-        "augmentation": {
+# set the status
+training_instance.status = "training"
+project.save()
 
-        },
-        "test_size": .20,
-        "batch_size": 32, # batch size needs to be divisible by (batch_offset + 1)
-        "epochs": 50
-    },
-    "run_2": {
-        "pre-trained": True,
-        "greyscale": False,
-        "augmentation": {
-            "flip_left_right": True,
-            "blur": 2, # creates n blured images increasing in fuzzyness,
-            "rotate_random_25": 2,
-        },
-        "test_size": .20,
-        "batch_size": 32, # batch size needs to be divisible by (batch_offset + 1)
-        "epochs": 50
-    }
-}
 
-for i, run in enumerate(training_runs):
-    run_key = training_runs.get(run)
-    T = Trainer(data_path=data_path, model_path=model_path, log_path=log_path, batch_size=run_key.get('batch_size'),
-                epochs=run_key.get('epochs'),
-                test_size=run_key.get('test_size'),
-                run_number=i,
-                run_parameters=run_key)
-    T.train()
+data_path = os.path.join('/', 'data', training_data['username'], training_data['project_name'], 'data')
+model_path = os.path.join('/', 'data', training_data['username'], training_data['project_name'], 'models')
+log_path = os.path.join('/', 'data', training_data['username'], training_data['project_name'], 'logs')
 
+with open('training_runs.json') as f:
+    training_runs = json.loads(f.read())
+
+try:
+    for i, run in enumerate(training_runs):
+        tr = TrainingRun()
+        run_key = training_runs.get(run)
+        T = Trainer(data_path=data_path, model_path=model_path, log_path=log_path,
+                    run_number=i,
+                    run_parameters=run_key)
+
+        training_history = T.train()
+        tr.epochs = training_history.get('epochs')
+        # need to convert numpy <float32> to python <Float>
+        tr.val_accuracy = [val.item() for val in training_history.get('history').get('val_accuracy')]
+        tr.training_accuracy = [val.item() for val in training_history.get('history').get('accuracy')]
+        tr.val_loss = [val.item() for val in training_history.get('history').get('val_loss')]
+        tr.training_loss = [val.item() for val in training_history.get('history').get('loss')]
+        tr.training_end_time = datetime.datetime.now()
+
+        training_instance.training_runs.append(tr)
+        project.save()
+
+    training_instance.status = "complete"
+
+    project.save()
+except:
+    training_instance.status = "training_failed"
+    project.save()
+
+sys.exit(0)

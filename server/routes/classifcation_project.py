@@ -1,6 +1,7 @@
 import json
 import datetime
 from bson.objectid import ObjectId
+import uuid
 from fastapi import APIRouter, HTTPException, Depends
 from modules.auth import oauth2_scheme
 from modules.auth import validate_current_user
@@ -29,9 +30,8 @@ async def create_classification_project(project: CreateClassificationProject, to
     # turn object into pymodm object from
     classes = PymodmPydanticBridge.pydatic_to_pymodm(project.classes, target_class="ClassData")
 
-    new_project = ClassificationProject(user=user, created=created, name=project.name,
-                                    description=project.description,
-                                    classes=classes)
+    new_project = ClassificationProject(user=user, created=created, name=project.name, description=project.description,
+                                        classes=classes)
     new_project.save()
     return "created project"
 
@@ -47,7 +47,10 @@ async def get_classification_project_by_id(_id: str, token: str = Depends(oauth2
 @router.delete("/projects/classification_project", status_code=200, tags=["classification_project"])
 async def delete_classification_project(_id: str, token: str = Depends(oauth2_scheme)):
     username = await validate_current_user(token)
-    ClassificationProject.objects.get({'_id': _id}).delete()
+    try:
+        ClassificationProject.objects.get({'_id': _id}).delete()
+    except:
+        return HTTPException(detail="Project doesn't exist", status_code=400)
     return "project deleted"
 
 
@@ -56,9 +59,13 @@ async def delete_classification_project(_id: str, token: str = Depends(oauth2_sc
 async def get_classification_project_by_id(token: str = Depends(oauth2_scheme)):
     username = await validate_current_user(token)
     db_projects = ClassificationProject.objects.raw({'user': username})
+
     # returns a list of single projects
     # response_model expects {'projects': projects}
     projects = PymodmPydanticBridge.pymodm_to_pydantic(db_projects, target_class="GetClassificationProject")
+
+    if not isinstance(projects, list):
+        return {'projects': [projects]}
     return {'projects': projects}
 
 
@@ -66,7 +73,10 @@ async def get_classification_project_by_id(token: str = Depends(oauth2_scheme)):
 @router.put("/projects/classification_project", status_code=200, tags=["classification_project"])
 async def update_classification_project(_id: str, project_update: CreateClassificationProject, token: str = Depends(oauth2_scheme)):
     user = await validate_current_user(token)
-    query = ClassificationProject.objects.get({'_id': _id})
+    try:
+        query = ClassificationProject.objects.get({'_id': _id})
+    except:
+        return HTTPException(detail="Project doesn't exist!", status_code=404)
 
     classes = PymodmPydanticBridge.pydatic_to_pymodm(project_update.classes, target_class="ClassData")
     project = PymodmPydanticBridge.pydatic_to_pymodm(project_update, target_class="ClassificationProject")
@@ -76,5 +86,4 @@ async def update_classification_project(_id: str, project_update: CreateClassifi
     project.user = user
 
     project.save()
-    # vars(project_update)
     return "project updated"
