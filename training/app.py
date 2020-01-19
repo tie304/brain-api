@@ -28,7 +28,7 @@ for instance in project.training_instances:
     if instance._id == training_data.get('training_instance_id'):
         training_instance = instance
 
-# set the status
+# set the status in the database
 training_instance.status = "training"
 project.save()
 
