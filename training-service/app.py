@@ -50,7 +50,7 @@ try:
 
         training_history = T.train()
         tr.epochs = training_history.get('epochs')
-        # need to convert numpy <float32> to python <Float>
+        # converts numpy <float32> to python <Float>
         tr.val_accuracy = [val.item() for val in training_history.get('history').get('val_accuracy')]
         tr.training_accuracy = [val.item() for val in training_history.get('history').get('accuracy')]
         tr.val_loss = [val.item() for val in training_history.get('history').get('val_loss')]

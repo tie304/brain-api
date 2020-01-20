@@ -10,7 +10,7 @@ from database.gathering import GatheringRun
 
 class ClassData(EmbeddedMongoModel):
     label = fields.CharField(required=True)
-    keywords = fields.ListField()
+    search_term = fields.CharField()
 
 
 class ClassificationProject(MongoModel):

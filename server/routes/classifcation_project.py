@@ -1,11 +1,11 @@
 import json
 import datetime
-from bson.objectid import ObjectId
-import uuid
+import pymodm.errors as DBerrors
 from fastapi import APIRouter, HTTPException, Depends
 from modules.auth import oauth2_scheme
 from modules.auth import validate_current_user
 
+from redis_conn import RedisConn
 from models.classification_project import CreateClassificationProject, GetClassificationProject, GetClassificationProjects
 from database.classification_project import ClassificationProject, ClassData
 from database.user import User
@@ -36,12 +36,16 @@ async def create_classification_project(project: CreateClassificationProject, to
     return "created project"
 
 
-@router.get("/projects/classification_project", status_code=200, response_model=GetClassificationProject, tags=["classification_project"])
+@router.get("/projects/classification_project", status_code=200, response_model=GetClassificationProjects, tags=["classification_project"])
 async def get_classification_project_by_id(_id: str, token: str = Depends(oauth2_scheme)):
     await validate_current_user(token)
-    db_project = ClassificationProject.objects.get({'_id': _id})
+    try:
+        db_project = ClassificationProject.objects.get({'_id': _id})
+    except DBerrors.DoesNotExist:
+        return HTTPException(detail="Project doesn't exist", status_code=400)
+
     project = PymodmPydanticBridge.pymodm_to_pydantic(db_project, target_class="GetClassificationProject")
-    return project
+    return {'projects': [project]}
 
 
 @router.delete("/projects/classification_project", status_code=200, tags=["classification_project"])
@@ -49,7 +53,7 @@ async def delete_classification_project(_id: str, token: str = Depends(oauth2_sc
     username = await validate_current_user(token)
     try:
         ClassificationProject.objects.get({'_id': _id}).delete()
-    except:
+    except DBerrors.DoesNotExist:
         return HTTPException(detail="Project doesn't exist", status_code=400)
     return "project deleted"
 
@@ -74,8 +78,8 @@ async def get_classification_project_by_id(token: str = Depends(oauth2_scheme)):
 async def update_classification_project(_id: str, project_update: CreateClassificationProject, token: str = Depends(oauth2_scheme)):
     user = await validate_current_user(token)
     try:
-        query = ClassificationProject.objects.get({'_id': _id})
-    except:
+        ClassificationProject.objects.get({'_id': _id})
+    except DBerrors.DoesNotExist:
         return HTTPException(detail="Project doesn't exist!", status_code=404)
 
     classes = PymodmPydanticBridge.pydatic_to_pymodm(project_update.classes, target_class="ClassData")
@@ -87,3 +91,30 @@ async def update_classification_project(_id: str, project_update: CreateClassifi
 
     project.save()
     return "project updated"
+
+
+@router.post("/projects/classification_project/collect_google_images", status_code=200, tags=["classification_project"])
+async def collect_project_images(_id: str, token: str = Depends(oauth2_scheme)):
+    user = await validate_current_user(token)
+    try:
+        project = ClassificationProject.objects.get({'_id': _id})
+    except DBerrors.DoesNotExist:
+        return HTTPException(detail="Project doesn't exist!", status_code=404)
+
+    if project.user.email != user:
+        return HTTPException(detail="Project does not belong to you.", status_code=401)
+
+    for training_class in project.classes:
+
+        data = {
+            "project": project.name,
+            "username": user,
+            "subclass": training_class.label,
+            "search_term": training_class.search_term,
+            "max_images": 1000
+        }
+        data = json.dumps(data)
+        RedisConn.CONN.rpush('gathering-queue', data)
+
+
+    return "data collection queued"

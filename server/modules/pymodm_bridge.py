@@ -19,9 +19,7 @@ class PymodmPydanticBridge:
             for obj in class_:
                 instance = cls._find_model_pymorm(target_class)
                 instances.append(instance(**vars(obj)))
-
             return instances
-
         instance = cls._find_model_pymorm(target_class)
         return instance(**vars(class_))
 
@@ -29,9 +27,9 @@ class PymodmPydanticBridge:
     def pymodm_to_pydantic(cls, class_, target_class: str):
         if isinstance(class_, Queryset):
             data = list(class_)
-            instance = cls._find_model_pydantic(target_class)
             instances = []
             for class_ in data:
+                instance = cls._find_model_pydantic(target_class) # must import per iteration
                 instance = instance(**class_.to_son().to_dict())
                 instances.append(instance)
             if len(instances) == 1:

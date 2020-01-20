@@ -1,9 +1,21 @@
 {
-    "run_2": {
+    "run_1": {
         "model": "resnet50",
         "test_size": 0.20,
         "shuffle": true,
         "batch_size": 32,
-        "epochs": 1
+        "epochs": 50
+    },
+    "run_2": {
+        "model": "resnet50",
+        "augmentation": {
+            "rotate_random_25": 2,
+            "blur": 2,
+            "flip_left_right": true
+        },
+        "test_size": 0.20,
+        "shuffle": true,
+        "batch_size": 32,
+        "epochs": 50
     }
 }

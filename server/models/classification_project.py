@@ -25,7 +25,7 @@ class TrainingInstance(BaseModel):
 
 class ClassData(BaseModel):
     label: str
-    keywords: List[str]
+    search_term: str
 
 
 class CreateClassificationProject(BaseModel):
