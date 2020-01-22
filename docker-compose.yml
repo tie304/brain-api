@@ -30,6 +30,7 @@ services:
       context: ./image-collection-service
     restart: always
     volumes:
+      - ./server/database:/app/database
       - ./image-collection-service:/app
       - ./data:/data
     links:

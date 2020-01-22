@@ -42,7 +42,6 @@ class DataAugmentationPipeline:
         assert len(augmented_images) == self.total_augmented_images + 1, "Augment error returning wrong values"
         return augmented_images
 
-
     @staticmethod
     def flip_left_right(img):
         return img.transpose(PIL.Image.FLIP_LEFT_RIGHT)

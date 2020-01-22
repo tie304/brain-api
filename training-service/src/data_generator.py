@@ -7,7 +7,6 @@ from tensorflow.keras.applications.resnet50 import ResNet50, preprocess_input
 from src.data_augmentation_pipeline import DataAugmentationPipeline
 
 
-
 class DataGenerator(keras.utils.Sequence):
     def __init__(self, image_refs, labels, batch_size, run_parameters, validation=False):
         print("Initializing data generator...")
@@ -92,7 +91,6 @@ class DataGenerator(keras.utils.Sequence):
 
         return grab_images_per_batch, batch_size
 
-
     def _pre_process_image(self, img: PIL):
         img = img.resize((224,224), Image.ANTIALIAS)
         img = img.convert('RGB')
@@ -110,10 +108,8 @@ class DataGenerator(keras.utils.Sequence):
             second_2_last_layer = base_model.get_layer("avg_pool")
             model = keras.Model(inputs=base_model.inputs, outputs=second_2_last_layer.output)
         else:
-            raise NotImplementedError('only resnet 50 supported at this time')
+            raise NotImplementedError('only resnet50 supported at this time')
         return model
-
-
 
     def _data_generation(self, image_refs, image_labels):
         X = []

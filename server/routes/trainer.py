@@ -1,4 +1,5 @@
 import json
+import pymodm.errors as DBerrors
 from fastapi import APIRouter, HTTPException, Depends
 from redis_conn import RedisConn
 from modules.auth import oauth2_scheme
@@ -20,7 +21,7 @@ async def collect(_id: str, token: str = Depends(oauth2_scheme)):
     username = await validate_current_user(token)
     try:
         project_db = ClassificationProject.objects.get({'_id': _id})
-    except Exception:
+    except DBerrors.DoesNotExist:
         return HTTPException(detail=ERRORS.get('NO_PROJECT'), status_code=400)
 
     try:

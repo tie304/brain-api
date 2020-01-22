@@ -11,12 +11,12 @@ from database.classification_project import ClassificationProject, ClassData
 from database.user import User
 from modules.pymodm_bridge import PymodmPydanticBridge
 
+
 router = APIRouter()
 
 
 @router.post("/projects/classification_project", status_code=201, tags=["classification_project"])
 async def create_classification_project(project: CreateClassificationProject, token: str = Depends(oauth2_scheme)):
-
     username = await validate_current_user(token)
     user = User.objects.get({"_id": username})
     projects = ClassificationProject.objects.raw({'user': username})
@@ -26,11 +26,9 @@ async def create_classification_project(project: CreateClassificationProject, to
         if p.name == project.name:
             return HTTPException(status_code=400, detail="Project name already created. Please chose another or delete existing one.")
 
-    created = datetime.datetime.now()
     # turn object into pymodm object from
     classes = PymodmPydanticBridge.pydatic_to_pymodm(project.classes, target_class="ClassData")
-
-    new_project = ClassificationProject(user=user, created=created, name=project.name, description=project.description,
+    new_project = ClassificationProject(user=user, name=project.name, description=project.description,
                                         classes=classes)
     new_project.save()
     return "created project"
@@ -56,7 +54,6 @@ async def delete_classification_project(_id: str, token: str = Depends(oauth2_sc
     except DBerrors.DoesNotExist:
         return HTTPException(detail="Project doesn't exist", status_code=400)
     return "project deleted"
-
 
 
 @router.get("/projects/classification_project/all", status_code=200, response_model=GetClassificationProjects, tags=["classification_project"])
@@ -105,16 +102,14 @@ async def collect_project_images(_id: str, token: str = Depends(oauth2_scheme)):
         return HTTPException(detail="Project does not belong to you.", status_code=401)
 
     for training_class in project.classes:
-
         data = {
             "project": project.name,
             "username": user,
             "subclass": training_class.label,
             "search_term": training_class.search_term,
-            "max_images": 1000
+            "max_images": training_class.max_images
         }
         data = json.dumps(data)
         RedisConn.CONN.rpush('gathering-queue', data)
-
 
     return "data collection queued"

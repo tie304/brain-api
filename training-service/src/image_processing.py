@@ -11,8 +11,6 @@ class ImageProcessing:
         self.test_size = test_size
         self.X_train, self.X_test, self.y_train, self.y_test = self.pre_process_data()
 
-
-
     def pre_process_data(self):
         data_refs = []
         data_labels = []

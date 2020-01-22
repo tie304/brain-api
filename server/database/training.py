@@ -14,7 +14,6 @@ class TrainingRun(EmbeddedMongoModel):
     training_loss = fields.ListField()
 
 
-
 class TrainingInstance(EmbeddedMongoModel):
     _id = fields.CharField(required=True, default=uuid.uuid4, primary_key=True)
     status = fields.CharField(default="pending_training")

@@ -34,8 +34,6 @@ class Trainer:
         history = feature_model.fit_generator(generator=train_generator, validation_data=valid_generator,
                                               epochs=self.run_parameters.get('epochs'),  callbacks=[es])
 
-
-
         if not os.path.exists(self.model_path):
             os.makedirs(os.path.join(self.model_path))
 
