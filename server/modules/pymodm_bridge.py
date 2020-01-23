@@ -31,7 +31,6 @@ class PymodmPydanticBridge:
             for class_ in data:
                 instance = cls._find_model_pydantic(target_class) # must import per iteration
                 mutated_query = cls._replace_ids(class_.to_son().to_dict())
-                print(mutated_query)
                 instance = instance(**mutated_query)
                 instances.append(instance)
             if len(instances) == 1:
@@ -43,7 +42,7 @@ class PymodmPydanticBridge:
             mutated_query = cls._replace_ids(class_.to_son().to_dict())
             return instance(**mutated_query)
 
-    """ Changes all attributes of mongo query with _id to id """
+    """ Traverses query and changes all attributes of mongo query with _id to id """
     @classmethod
     def _replace_ids(cls, query):
         modified_dict = {}
@@ -51,7 +50,10 @@ class PymodmPydanticBridge:
         if isinstance(query, list):
             modified_list = []
             for item in query:
-                modified_list.append(cls._replace_ids(item))
+                if isinstance(item, dict):
+                    modified_list.append(cls._replace_ids(item))
+                else:
+                    modified_list.append(item)
             return modified_list
         else:
             # loop ovr (k,v) and add and _id attr
