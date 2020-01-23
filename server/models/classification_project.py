@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 
 
 class TrainingRuns(BaseModel):
-    id: str = Field(..., alias='_id')
+    id: str
     training_start_time: datetime.datetime
     training_end_time: Any
     epochs: int
@@ -15,14 +15,14 @@ class TrainingRuns(BaseModel):
 
 
 class TrainingInstance(BaseModel):
-    id: str = Field(..., alias='_id')
+    id: str
     status: Any
     created: datetime.datetime
     training_runs: List[TrainingRuns] = []
 
 
 class GatheringRun(BaseModel):
-    id: str = Field(..., alias='_id')
+    id: str
     start_time: datetime.datetime
     status: str
     end_time: datetime.datetime = None
@@ -33,7 +33,7 @@ class GatheringRun(BaseModel):
 class ClassData(BaseModel):
     label: str
     search_term: str
-    max_images: int = 1000
+    max_images: int = 0
 
 
 class CreateClassificationProject(BaseModel):
@@ -43,7 +43,7 @@ class CreateClassificationProject(BaseModel):
 
 
 class GetClassificationProject(BaseModel):
-    id: str = Field(..., alias='_id')
+    id: str
     name: str
     description: str
     classes: List[ClassData]

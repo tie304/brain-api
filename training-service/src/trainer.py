@@ -22,8 +22,6 @@ class Trainer:
         ip = ImageProcessing(self.data_path, test_size=self.run_parameters.get('test_size'))
         network_factory = NetworkFactory(network_parameters=self.run_parameters.get('network'), n_classes=ip.n_classes)
 
-
-
         model = network_factory.build()
 
         train_generator = DataGenerator(ip.X_train, ip.y_train, batch_size=self.run_parameters.get('batch_size'),

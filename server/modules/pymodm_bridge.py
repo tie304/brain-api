@@ -30,7 +30,8 @@ class PymodmPydanticBridge:
             instances = []
             for class_ in data:
                 instance = cls._find_model_pydantic(target_class) # must import per iteration
-                instance = instance(**class_.to_son().to_dict())
+                mutated_query = cls._replace_ids(class_.to_son().to_dict())
+                instance = instance(**mutated_query)
                 instances.append(instance)
             if len(instances) == 1:
                 return instances[0]
@@ -38,8 +39,31 @@ class PymodmPydanticBridge:
                 return instances
         else:
             instance = cls._find_model_pydantic(target_class)
-            return instance(**class_.to_son().to_dict())
+            mutated_query = cls._replace_ids(class_.to_son().to_dict())
+            return instance(**mutated_query)
 
+    """ Changes all attributes of mongo query with _id to id """
+    @classmethod
+    def _replace_ids(cls, query):
+        modified_dict = {}
+        # if its a list loop through and preform recursion
+        if isinstance(query, list):
+            modified_list = []
+            for item in query:
+                modified_list.append(cls._replace_ids(item))
+            return modified_list
+        else:
+            # loop ovr (k,v) and add and _id attr
+            for k, v in query.items():
+                if isinstance(v, list):
+                    modified_dict[k] = cls._replace_ids(v)
+                if k == "_id":
+                    modified_dict['id'] = v
+                else:
+                    modified_dict[k] = v
+            return modified_dict
+
+    """ Looks for Pytantic model class and returns it """
     @classmethod
     def _find_model_pydantic(cls, class_):
         model_files = os.listdir(cls.PYTANTIC_MODULE_DIR)
@@ -50,6 +74,7 @@ class PymodmPydanticBridge:
                 return obj
         raise ImportError("Module not found. Please make sure Pydantic and ORM Classes share the same name")
 
+    """ Looks for Pymorm class and returns it """
     @classmethod
     def _find_model_pymorm(cls, class_):
         model_files = os.listdir(cls.PYMORM_MODULE_DIR)
@@ -60,6 +85,7 @@ class PymodmPydanticBridge:
                 return obj
         raise ImportError("Module not found. Please make sure Pydantic and ORM Classes share the same name")
 
+    """ Builds import path and returns it """
     @staticmethod
     def _import(module):
         components = module.split('.')

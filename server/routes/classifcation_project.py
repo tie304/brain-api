@@ -63,7 +63,7 @@ async def get_classification_project_by_id(token: str = Depends(oauth2_scheme)):
 
     # returns a list of single projects
     # response_model expects {'projects': projects}
-    projects = PymodmPydanticBridge.pymodm_to_pydantic(db_projects, target_class="GetClassificationProject")
+    projects = PymodmPydanticBridge.pymodm_to_pydantic(class_=db_projects, target_class="GetClassificationProject")
 
     if not isinstance(projects, list):
         return {'projects': [projects]}
