@@ -1,0 +1,81 @@
+version: '3'
+services:
+  server:
+    env_file:
+      - .env
+    ports:
+      - "80:80"
+    build:
+      dockerfile: Dockerfile.prod
+      context: ./server
+    volumes:
+      - ./server:/app
+      - ./data:/data
+    links:
+      - mongo
+      - redis
+    depends_on:
+      - redis
+      - mongo
+
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MONGO_URI=mongodb://mongo:27017/
+      - MONGO_DB_NAME=image-detector
+
+  image_collector:
+    build:
+      dockerfile: Dockerfile
+      context: ./image-collection-service
+    restart: always
+    volumes:
+      - ./server/database:/app/database
+      - ./image-collection-service:/app
+      - ./data:/data
+    links:
+      - mongo
+      - redis
+    depends_on:
+      - redis
+      - mongo
+
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MONGO_URI=mongodb://mongo:27017/
+      - MONGO_DB_NAME=image-detector
+
+
+
+  training:
+    build:
+      dockerfile: Dockerfile
+      context: ./training-service
+    restart: always
+    volumes:
+      - ./training-service:/app
+      - ./data:/data
+      - ./server/database:/app/database
+    links:
+      - mongo
+      - redis
+    depends_on:
+      - redis
+      - mongo
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MONGO_URI=mongodb://mongo:27017/
+      - MONGO_DB_NAME=image-detector
+
+  mongo:
+    container_name: mongo
+    image: mongo
+    ports:
+      - "27017:27017"
+  redis:
+    image: redis
+    container_name: redis
+
+
