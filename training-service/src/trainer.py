@@ -1,10 +1,12 @@
 import os
 import json
+import traceback
+import numpy as np
+from src.network_factory import NetworkFactory
 from tensorflow.keras.callbacks import EarlyStopping
 from src.data_generator import DataGenerator
 from src.image_processing import ImageProcessing
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense
+
 import tensorflow.keras.backend as K
 
 
@@ -18,6 +20,12 @@ class Trainer:
 
     def train(self):
         ip = ImageProcessing(self.data_path, test_size=self.run_parameters.get('test_size'))
+        network_factory = NetworkFactory(network_parameters=self.run_parameters.get('network'), n_classes=ip.n_classes)
+
+
+
+        model = network_factory.build()
+
         train_generator = DataGenerator(ip.X_train, ip.y_train, batch_size=self.run_parameters.get('batch_size'),
                                         run_parameters=self.run_parameters)
 
@@ -26,18 +34,18 @@ class Trainer:
 
         es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, restore_best_weights=True)
 
-        feature_model = Sequential()
-        feature_model.add(Dense(ip.n_classes, activation="softmax"))
-        feature_model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
+
+
+        model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
 
         K.clear_session()
-        history = feature_model.fit_generator(generator=train_generator, validation_data=valid_generator,
+        history = model.fit_generator(generator=train_generator, validation_data=valid_generator,
                                               epochs=self.run_parameters.get('epochs'),  callbacks=[es])
 
         if not os.path.exists(self.model_path):
             os.makedirs(os.path.join(self.model_path))
 
-        feature_model.save(os.path.join(self.model_path, f"model-{self.run_number}.h5"))
+        model.save(os.path.join(self.model_path, f"model-{self.run_number}.h5"))
 
         data = {'history': history.history, 'epochs': len(history.history.get('loss'))}
 

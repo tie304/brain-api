@@ -18,13 +18,10 @@ class DataGenerator(keras.utils.Sequence):
         # calculate how many images to get per batch based on augmentation
         self.grab_images_per_batch, self.batch_size = self._calc_batch_size(image_refs, batch_size)
         self.image_refs = image_refs
-        if self.run_parameters.get('model'):
-            self.pre_trained_model = self._build_pre_trained_model(run_parameters.get('model'))
         self.on_epoch_end()
 
 
         print(f"Processing: {self.grab_images_per_batch} images per batch and feeding {self.batch_size}  images per batch")
-        print(f"Training with {self.run_parameters.get('model')} ")
 
     def __len__(self):
         return int(np.floor(len(self.image_refs) / self.grab_images_per_batch))
@@ -80,7 +77,7 @@ class DataGenerator(keras.utils.Sequence):
                 #  batch_size:1 * 65 = 65
                 # grab one image and it will generate a batch of 65
 
-                self._calc_batch_size(image_refs, batch_size=batch_size + 1)
+                return self._calc_batch_size(image_refs, batch_size=batch_size + 1)
 
             batch_size = (grab_images_per_batch * (extra_images + 1))
         else:
@@ -97,19 +94,9 @@ class DataGenerator(keras.utils.Sequence):
         img = np.array(img)
         img = img / 255
         img = img.reshape((1, 224, 224, 3))
-        img = preprocess_input(img) # resnet preprocess
-        img = self.pre_trained_model.predict(img)
+        if self.run_parameters.get('network').get('model') == "resnet50":
+            img = preprocess_input(img)
         return img
-
-    @staticmethod
-    def _build_pre_trained_model(model):
-        if model == "resnet50":
-            base_model = ResNet50(weights="imagenet")
-            second_2_last_layer = base_model.get_layer("avg_pool")
-            model = keras.Model(inputs=base_model.inputs, outputs=second_2_last_layer.output)
-        else:
-            raise NotImplementedError('only resnet50 supported at this time')
-        return model
 
     def _data_generation(self, image_refs, image_labels):
         X = []
@@ -127,6 +114,6 @@ class DataGenerator(keras.utils.Sequence):
                 y.append(image_labels[i])
 
         X = np.array(X)
-        X = X.reshape((self.batch_size, 2048)) # shape is res net output
+        X = X.reshape((self.batch_size, 224, 224, 3)) # shape is res net output
 
         return X, np.array(y)

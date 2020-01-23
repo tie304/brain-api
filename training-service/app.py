@@ -2,6 +2,7 @@ import os
 import json
 import sys
 import datetime
+import traceback
 from pymodm import connect
 
 from redis_conn import RedisConn
@@ -63,7 +64,8 @@ try:
     training_instance.status = "complete"
 
     project.save()
-except:
+except Exception as e:
+    print("TRAINING FAILED:\n", traceback.format_exc())
     training_instance.status = "training_failed"
     project.save()
 
