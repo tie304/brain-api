@@ -22,7 +22,7 @@ training_data = json.loads(data[1])
 
 # query project
 project = ClassificationProject.objects.get({'_id': training_data.get('project_id')})
-
+training_runs = training_data.get('run_parameters')
 # find specific training instance from the project object
 training_instance = None
 for instance in project.training_instances:
@@ -38,8 +38,7 @@ data_path = os.path.join('/', 'data', training_data['username'], training_data['
 model_path = os.path.join('/', 'data', training_data['username'], training_data['project_name'], 'models')
 log_path = os.path.join('/', 'data', training_data['username'], training_data['project_name'], 'logs')
 
-with open('training_runs.json') as f:
-    training_runs = json.loads(f.read())
+
 
 try:
     for i, run in enumerate(training_runs):
