@@ -31,6 +31,7 @@ class PymodmPydanticBridge:
             for class_ in data:
                 instance = cls._find_model_pydantic(target_class) # must import per iteration
                 mutated_query = cls._replace_ids(class_.to_son().to_dict())
+                print(mutated_query)
                 instance = instance(**mutated_query)
                 instances.append(instance)
             if len(instances) == 1:
@@ -55,12 +56,13 @@ class PymodmPydanticBridge:
         else:
             # loop ovr (k,v) and add and _id attr
             for k, v in query.items():
-                if isinstance(v, list):
-                    modified_dict[k] = cls._replace_ids(v)
                 if k == "_id":
                     modified_dict['id'] = v
+                elif isinstance(v, list):
+                    modified_dict[k] = cls._replace_ids(v)
                 else:
                     modified_dict[k] = v
+
             return modified_dict
 
     """ Looks for Pytantic model class and returns it """
