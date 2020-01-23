@@ -119,3 +119,10 @@ $.ajax(settings).done(function (response) {
 ```
 /{{PROECT_ROOT}}/data/{{EAMIL}}/{{PROJECT_NAME}}/{{MODELS}}
 ```
+
+## Roadmap
+1. Transfer project into [Kubernetes](https://kubernetes.io/) for more effecent scaling.
+2. Implement [NAS](https://towardsdatascience.com/neural-architecture-search-nas-the-future-of-deep-learning-c99356351136)
+3. Build model serving API. So users can train and deploy their own models.
+4. Implement data upload API
+5. Building a user interface
