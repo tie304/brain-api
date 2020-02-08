@@ -1,27 +1,28 @@
+language: generic
 sudo: required
 services:
   - docker
 
 # pre install for tests
 before_install:
-  - docker build -t tylerhanson1/brain-api -f ./client/Dockerfile.dev ./client
+  - docker build -t tylerhanson/brain-api -f ./client/Dockerfile.dev ./client
 # run tests
 script:
   - docker run -e CI=true tylerhanson1/brain-api npm test
 # build all images
 after_success:
-  - docker build -t tylerhanson1/brain-api-client ./client
-  - docker build -t tylerhanson1/brain-api-nginx ./nginx
-  - docker build -t tylerhanson1/brain-api-server ./server
-  - docker build -t tylerhanson1/brain-api-training ./training-service
-  - docker build -t tylerhanson1/brain-api-image_collection ./image-collection-service
+  - docker build -t tylerhanson/brain-api-client ./client
+  - docker build -t tylerhanson/brain-api-nginx ./nginx
+  - docker build -t tylerhanson/brain-api-server ./server
+  - docker build -t tylerhanson/brain-api-training ./training-service
+  - docker build -t tylerhanson/brain-api-image_collection ./image-collection-service
 
 
   # log into docker
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --pasword-stdin
   # push images to docker hub
-  - docker push tylerhanson1/brain-api-client
-  - docker push tylerhanson1/brain-api-nginx
-  - docker push tylerhanson1/brain-api-server
-  - docker push tylerhanson1/brain-api/training
-  - docker push tylerhanson1/brain-api-image_collection
+  - docker push tylerhanson/brain-api-client
+  - docker push tylerhanson/brain-api-nginx
+  - docker push tylerhanson/brain-api-server
+  - docker push tylerhanson/brain-api/training
+  - docker push tylerhanson/brain-api-image_collection
