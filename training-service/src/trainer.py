@@ -1,8 +1,5 @@
 import os
-import json
-import traceback
-import numpy as np
-from src.network_factory import NetworkFactory
+from src.network_factory.network_factory import NetworkFactory
 from tensorflow.keras.callbacks import EarlyStopping
 from src.data_generator import DataGenerator
 from src.image_processing import ImageProcessing
@@ -20,9 +17,10 @@ class Trainer:
 
     def train(self):
         ip = ImageProcessing(self.data_path, test_size=self.run_parameters.get('test_size'))
-        network_factory = NetworkFactory(network_parameters=self.run_parameters.get('network'), n_classes=ip.n_classes)
+        network_factory = NetworkFactory(network_parameters=self.run_parameters.get('network'), n_classes=ip.n_classes,
+                                         input_shape=tuple(self.run_parameters.get('input_shape')))
 
-        model = network_factory.build()
+        model = network_factory.build_cnn()
 
         train_generator = DataGenerator(ip.X_train, ip.y_train, batch_size=self.run_parameters.get('batch_size'),
                                         run_parameters=self.run_parameters)
@@ -31,8 +29,6 @@ class Trainer:
                                         run_parameters=self.run_parameters, validation=True)
 
         es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, restore_best_weights=True)
-
-
 
         model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
 

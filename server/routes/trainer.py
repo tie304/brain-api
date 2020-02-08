@@ -18,8 +18,8 @@ ERRORS = {
 router = APIRouter()
 
 
-@router.post("/train/", status_code=201, tags=["trainer"])
-async def collect(_id: str, run_parameters: RunParameters, token: str = Depends(oauth2_scheme)):
+@router.post("/train", status_code=201, tags=["trainer"])
+async def collect(_id: str, token: str = Depends(oauth2_scheme)):
     username = await validate_current_user(token)
     try:
         project_db = ClassificationProject.objects.get({'_id': _id})
@@ -42,7 +42,6 @@ async def collect(_id: str, run_parameters: RunParameters, token: str = Depends(
 
     data = {
         "project_id": project_db._id,
-        "run_parameters": run_parameters.dict().get('run_parameters'),
         "project_name": project_db.name,
         "training_instance_id": training_instance._id,
         "username": username,

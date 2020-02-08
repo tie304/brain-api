@@ -24,7 +24,7 @@ async def create_classification_project(project: CreateClassificationProject, to
     # check if user has already created a project
     for p in projects:
         if p.name == project.name:
-            return HTTPException(status_code=400, detail="Project name already created. Please chose another or delete existing one.")
+            raise HTTPException(status_code=400, detail="Project name already created. Please chose another or delete existing one.")
 
     # turn object into pymodm object from
     classes = PymodmPydanticBridge.pydatic_to_pymodm(project.classes, target_class="ClassData")
@@ -40,7 +40,7 @@ async def get_classification_project_by_id(_id: str, token: str = Depends(oauth2
     try:
         db_project = ClassificationProject.objects.get({'_id': _id})
     except DBerrors.DoesNotExist:
-        return HTTPException(detail="Project doesn't exist", status_code=400)
+        raise HTTPException(detail="Project doesn't exist", status_code=400)
 
     project = PymodmPydanticBridge.pymodm_to_pydantic(db_project, target_class="GetClassificationProject")
     return {'projects': [project]}
@@ -52,7 +52,7 @@ async def delete_classification_project(_id: str, token: str = Depends(oauth2_sc
     try:
         ClassificationProject.objects.get({'_id': _id}).delete()
     except DBerrors.DoesNotExist:
-        return HTTPException(detail="Project doesn't exist", status_code=400)
+        raise HTTPException(detail="Project doesn't exist", status_code=400)
     return "project deleted"
 
 
@@ -68,7 +68,6 @@ async def get_classification_project_by_id(token: str = Depends(oauth2_scheme)):
     if not isinstance(projects, list):
         return {'projects': [projects]}
     return {'projects': projects}
-
 
 
 @router.put("/projects/classification_project", status_code=200, tags=["classification_project"])

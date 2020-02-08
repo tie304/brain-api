@@ -9,7 +9,7 @@ class GatheringRun(MongoModel):
     status = fields.CharField()
     end_time = fields.DateTimeField()
     search_term = fields.CharField()
-    urls_visited = fields.ListField(default=[])
+    urls_visited = fields.ListField(default=[], blank=True)
 
 
 
