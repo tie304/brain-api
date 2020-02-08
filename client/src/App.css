@@ -1,0 +1,172 @@
+*,
+*::after,
+*::before {
+    margin: 0;
+    padding: 0;
+    box-sizing: inherit;
+}
+
+html {
+    font-size: 62.5%
+}
+
+
+.form--login {
+     position: absolute;
+    z-index: 99;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+    padding: 3rem;
+    background-color:  #E5E5E3;
+    display: flex;
+    width: 30rem;
+
+    flex-direction: column;
+    align-items: center;
+
+}
+.header {
+    padding: 5rem;
+    background-color: #333;
+    color: #fff;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+
+.dashboard {
+    margin-top: 5rem;
+    padding: 5rem;
+}
+
+.dashboard__projects {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}
+
+.dashboard__create-project {
+    position: absolute;
+    padding: 4rem;
+    border-radius: 50%;
+    background-color: rgb(153,187,222);
+    font-size: 20px;
+    right: 20px;
+    display: inline-block;
+    top: 85vh;
+    box-shadow: 13px 7px 24px 0px rgba(0,0,0,0.75);
+}
+
+.dashboard__create-project:hover {
+      cursor: pointer;
+    transform: translate(-10px);
+    transition: 1s;
+}
+
+.project-card {
+    list-style: none;
+    padding: 5rem;
+    height: 20rem;
+    background-color: #E5E5E3;
+    min-width: 30rem;
+    border-radius: 5px;
+
+}
+
+
+.project-card__actions {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}
+
+.project-card__actions button{
+    margin-top: 3rem;
+}
+
+
+input[type=text], input[type=password], select {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+input[type=submit] {
+  width: 100%;
+  background-color: #4CAF50;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+input[type=submit]:hover {
+  background-color: #45a049;
+}
+
+textarea {
+   padding: 3rem;
+}
+
+label {
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+
+
+.button {
+    padding: 1rem;
+    background-color: #333333;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+}
+
+.project-create {
+    position: absolute;
+    z-index: 99;
+    left: 50%;
+    transform: translate(-50%,10%);
+    padding: 3rem;
+    background-color:  #E5E5E3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 13px 7px 24px 0px rgba(0,0,0,0.75);
+
+}
+
+.tag {
+    padding: 1rem;
+    color: #fff;
+    background-color: #333;
+    margin: 1rem;
+    list-style: none;
+    border-radius: 25px;
+
+}
+
+.project-card h1 {
+    font-size: 3rem;
+}
+.project-card__tags li {
+    margin-top: 3rem;
+    display: inline-block;
+    margin-right: 1rem;
+    list-style: none;
+    background-color: white;
+    padding: 1rem;
+
+    margin-bottom: 0.5rem;
+    max-width: 3rem;
+    text-align: center;
+
+}

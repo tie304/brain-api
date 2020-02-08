@@ -2,9 +2,10 @@ import os
 from PIL import Image
 from sklearn.model_selection import train_test_split
 
+""" Removes invalid images, labels data creates train test split """
+
 
 class ImageProcessing:
-
     def __init__(self, directory, accepted_files=['jpg', 'jpeg', 'png'], test_size=0.20):
         self.directory = directory
         self.accepted_files = accepted_files

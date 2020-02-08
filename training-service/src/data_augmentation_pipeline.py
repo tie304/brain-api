@@ -25,7 +25,7 @@ class DataAugmentationPipeline:
     def augment(self, img: PIL):
         augmented_images = []
         img = img.convert('RGB')
-        augmented_images.append(img)
+        augmented_images.append(img) # append original images
 
         if self.augmentation_params.get('flip_left_right'):
             augmented_images.append(self.flip_left_right(img))

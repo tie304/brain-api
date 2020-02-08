@@ -2,10 +2,12 @@ import random
 import numpy as np
 import PIL
 import tensorflow.keras as keras
-from PIL import Image, ImageFilter
-from tensorflow.keras.applications.resnet50 import ResNet50, preprocess_input
+from PIL import Image
+
 from src.data_augmentation_pipeline import DataAugmentationPipeline
 
+
+""" Generates Data in batches for network training """
 
 class DataGenerator(keras.utils.Sequence):
     def __init__(self, image_refs, labels, batch_size, run_parameters, validation=False):
@@ -41,7 +43,7 @@ class DataGenerator(keras.utils.Sequence):
             np.random.shuffle(self.indexes)
 
     def _calc_batch_size(self, image_refs, batch_size):
-        """Calculate the batch size with consideration to the amount of images your augmenting
+        """Calculate the batch size with respect to the amount of images augmenting
 
             we need to calculate the number of images being augmented to add to the batch size. This function keeps the
             amount of data retrieved from the fs consistent with the batch output to NN.
@@ -89,13 +91,18 @@ class DataGenerator(keras.utils.Sequence):
         return grab_images_per_batch, batch_size
 
     def _pre_process_image(self, img: PIL):
-        img = img.resize((224,224), Image.ANTIALIAS)
-        img = img.convert('RGB')
+        img = img.resize((self.run_parameters.get('input_shape')[0],
+                          self.run_parameters.get('input_shape')[1]), Image.ANTIALIAS)
+        if self.run_parameters.get('greyscale'):
+            img = img.convert.convert('LA')
+        else:
+            img = img.convert('RGB')
         img = np.array(img)
         img = img / 255
-        img = img.reshape((1, 224, 224, 3))
-        if self.run_parameters.get('network').get('model') == "resnet50":
-            img = preprocess_input(img)
+        # casts list to tuple
+        img_shape = (1,) + tuple(self.run_parameters.get('input_shape'))
+
+        img = img.reshape(img_shape)
         return img
 
     def _data_generation(self, image_refs, image_labels):
@@ -104,6 +111,7 @@ class DataGenerator(keras.utils.Sequence):
         # Generate data
         for i, img in enumerate(image_refs):
             pil_img = Image.open(img)
+            # if not validation data do not augment AND if no augmentation parameters ignore
             if not self.validation and self.run_parameters.get("augmentation", False):
                 augmented_images = self.augment_pipeline.augment(pil_img) # augments images (flips, zooms ect...)
                 for image in augmented_images:
@@ -113,7 +121,9 @@ class DataGenerator(keras.utils.Sequence):
                 X.append(self._pre_process_image(pil_img))
                 y.append(image_labels[i])
 
-        X = np.array(X)
-        X = X.reshape((self.batch_size, 224, 224, 3)) # shape is res net output
+        X = np.array(X) # convert to numpy array
+        # reshape to fit
+        batch_shape = (self.batch_size,) + tuple(self.run_parameters.get('input_shape'))
+        X = X.reshape(batch_shape)
 
         return X, np.array(y)

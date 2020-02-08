@@ -4,7 +4,6 @@ import sys
 import datetime
 import traceback
 from pymodm import connect
-
 from redis_conn import RedisConn
 from src.trainer import Trainer
 from database.training import TrainingInstance, TrainingRun
@@ -22,7 +21,9 @@ training_data = json.loads(data[1])
 
 # query project
 project = ClassificationProject.objects.get({'_id': training_data.get('project_id')})
-training_runs = training_data.get('run_parameters')
+with open('training_runs.json') as f:
+    training_runs = json.loads(f.read())
+
 # find specific training instance from the project object
 training_instance = None
 for instance in project.training_instances:
@@ -39,15 +40,14 @@ model_path = os.path.join('/', 'data', training_data['username'], training_data[
 log_path = os.path.join('/', 'data', training_data['username'], training_data['project_name'], 'logs')
 
 
-
 try:
     for i, run in enumerate(training_runs):
         tr = TrainingRun()
         run_key = training_runs.get(run)
+        print(run, "RUN")
         T = Trainer(data_path=data_path, model_path=model_path, log_path=log_path,
                     run_number=i,
                     run_parameters=run_key)
-
         training_history = T.train()
         tr.epochs = training_history.get('epochs')
         # converts numpy <float32> to python <Float>

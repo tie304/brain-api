@@ -16,6 +16,7 @@ connect(os.environ.get('MONGO_URI') + os.environ.get("MONGO_DB_NAME"))
 data = RedisConn.CONN.blpop('gathering-queue') # blocking operation until data enters queue
 gathering_data = json.loads(data[1]) # load json string from redis
 
+
 try:
     project = ClassificationProject.objects.get({'name': gathering_data.get('project')})
 except DBerrors.DoesNotExist:

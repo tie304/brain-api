@@ -37,25 +37,25 @@ class GoogleImageCollector:
         for _ in range(500):
             self.browser.execute_script("window.scrollBy(0,10000)")
 
-            for x in self.browser.find_elements_by_xpath('//div[contains(@class,"rg_meta")]'):
+            for x in self.browser.find_elements_by_xpath('//img[contains(@class,"rg_i")]'):
+                print(x)
                 self.counter += 1
                 print("Total Count:", self.counter)
                 print("Succsessful Count:", self.success_counter)
-                print("URL:", json.loads(x.get_attribute('innerHTML'))["ou"])
-                img = json.loads(x.get_attribute('innerHTML'))["ou"]
+
+                img = x.get_attribute('data-iurl')
+                print(img)
                 if img in self.visited_urls:
                     continue
-                img_type = json.loads(x.get_attribute('innerHTML'))["ity"]
+
                 try:
                     raw_img = urllib.urlopen(img, timeout=5).read()
                 except Exception as e:
                     print("Failed to download image", e)
 
                 try:
-                    if len(img_type) == 0:
-                        f = open(os.path.join(self.data_path, "img" + "_" + str(self.success_counter + len(self.visited_urls)) + ".jpg"), 'wb')
-                    else:
-                        f = open(os.path.join(self.data_path, "img" + "_" + str(self.success_counter + len(self.visited_urls)) + "." + img_type), 'wb')
+                    f = open(os.path.join(self.data_path, "img" + "_" + str(self.success_counter + len(self.visited_urls)) + ".jpg"), 'wb')
+
                     f.write(raw_img)
                     f.close()
                     self.success_counter += 1

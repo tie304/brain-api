@@ -23,6 +23,19 @@ services:
       - REDIS_PORT=6379
       - MONGO_URI=mongodb://mongo:27017/
       - MONGO_DB_NAME=image-detector
+      -
+
+  nginx:
+    depends_on:
+      - api
+      - client
+    restart: always
+    build:
+      dockerfile: Dockerfile
+      context: ./nginx
+    ports:
+      - '80:80'
+
 
   image_collector:
     build:

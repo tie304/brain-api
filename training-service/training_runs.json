@@ -1,0 +1,15 @@
+{
+   "run_1": {
+      "network": {
+          "model": "base_cnn",
+          "activation": "softmax"
+      },
+      "test_size": 0.20,
+      "input_shape": [224,224,3],
+      "greyscale": false,
+      "shuffle": true,
+      "batch_size": 32,
+      "epochs": 50
+ }
+
+}
