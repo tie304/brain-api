@@ -19,7 +19,7 @@ after_success:
 
 
   # log into docker
-  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --pasword-stdin
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
   # push images to docker hub
   - docker push tylerhanson1/brain-api-client
   - docker push tylerhanson1/brain-api-nginx
