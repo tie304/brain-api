@@ -6,7 +6,7 @@ services:
     ports:
       - "8000:8000"
     build:
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
       context: ./server
     volumes:
       - ./server:/app

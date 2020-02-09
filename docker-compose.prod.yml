@@ -1,12 +1,12 @@
 version: '3'
 services:
-  server:
+  api:
     env_file:
       - .env
     ports:
-      - "80:80"
+      -  "8000:8000"
     build:
-      dockerfile: Dockerfile.prod
+      dockerfile: Dockerfile
       context: ./server
     volumes:
       - ./server:/app
@@ -23,7 +23,11 @@ services:
       - REDIS_PORT=6379
       - MONGO_URI=mongodb://mongo:27017/
       - MONGO_DB_NAME=image-detector
-      -
+
+  client:
+    build:
+      dockerfile: Dockerfile
+      context: ./client
 
   nginx:
     depends_on:

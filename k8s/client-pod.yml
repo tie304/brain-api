@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod # runs one or more closely related containers
+metadata:
+  name: client-pod # names the pod
+  labels:
+    component: web
+spec:
+  containers:
+    - name: client
+      image: tylerhanson1/brain-api-client
+      ports:
+        - containerPort: 3000 # expose to outside world

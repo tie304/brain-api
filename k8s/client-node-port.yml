@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service # sets up networking in a Kubernetes cluster
+metadata:
+  name: client-node-port
+spec:
+  type: NodePort # type fo services. Exposes container to outside world
+  ports:
+    - port: 3050 # other pods access
+      targetPort: 3000 # port inside pod we want to open traffic to
+      nodePort: 31515 # port exposed outside 300000 - 32767 NOT USED IN PROD usually
+  selector:
+    component: Web
+
