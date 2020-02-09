@@ -30,5 +30,5 @@ after_success:
   - docker push tylerhanson1/brain-api-client
   - docker push tylerhanson1/brain-api-nginx
   - docker push tylerhanson1/brain-api-server
-  - docker push tylerhanson1/brain-api/training
+  - docker push tylerhanson1/brain-api-training
   - docker push tylerhanson1/brain-api-image_collection
