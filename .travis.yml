@@ -3,6 +3,12 @@ sudo: required
 services:
   - docker
 
+# safelist
+branches:
+  only:
+  - master
+  - development
+
 # pre install for tests
 before_install:
   - docker build -t tylerhanson1/brain-api -f ./client/Dockerfile.dev ./client
