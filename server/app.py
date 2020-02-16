@@ -12,6 +12,11 @@ from redis_conn import RedisConn
 
 app = FastAPI()
 
+print(os.environ.get('MONGO_URI'), "MONGO_URI")
+print(os.environ.get("MONGO_DB_NAME"), "MONGO_DB_NAME")
+print(os.environ.get('REDIS_HOST'), "REDIS_HOST")
+print(os.environ.get('REDIS_PORT'), "REDIS_PORT")
+
 connect(os.environ.get('MONGO_URI') + os.environ.get("MONGO_DB_NAME"))
 RedisConn.initialize(os.environ.get('REDIS_HOST'), os.environ.get('REDIS_PORT'))
 

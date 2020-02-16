@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trainer-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: trainer
+  template:
+    metadata:
+      labels:
+        component: trainer
+    spec:
+      containers:
+        - name: trainer
+          image: tylerhanson1/brain-api-training
+          env:
+            - name: REDIS_HOST
+              value: redis-cluster-ip-service
+            - name: REDIS_PORT
+              value: "6379"
+            - name: MONGO_URI
+              value: mongo-cluster-ip-service
+            - name: MONGO_DB_NAME
+              value: image-detector

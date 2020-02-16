@@ -1,8 +1,5 @@
-import tensorflow.keras as keras
-from tensorflow.keras.applications.resnet50 import ResNet50
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D
-
 
 
 """ Generates neural networks """

@@ -3,13 +3,14 @@ import numpy as np
 import PIL
 import tensorflow.keras as keras
 from PIL import Image
-
 from src.data_augmentation_pipeline import DataAugmentationPipeline
 
 
 """ Generates Data in batches for network training """
 
+
 class DataGenerator(keras.utils.Sequence):
+
     def __init__(self, image_refs, labels, batch_size, run_parameters, validation=False):
         print("Initializing data generator...")
         self.labels = labels
@@ -21,7 +22,6 @@ class DataGenerator(keras.utils.Sequence):
         self.grab_images_per_batch, self.batch_size = self._calc_batch_size(image_refs, batch_size)
         self.image_refs = image_refs
         self.on_epoch_end()
-
 
         print(f"Processing: {self.grab_images_per_batch} images per batch and feeding {self.batch_size}  images per batch")
 

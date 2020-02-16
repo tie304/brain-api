@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: server-cluster-ip-service
+spec:
+  type: ClusterIP
+  selector:
+    component: server
+  ports:
+    - port: 5000 # Inside the cluster, what port does the service expose?
+      targetPort: 5000 # Which port do pods selected by this service expose?
+
+
+
